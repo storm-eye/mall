@@ -1,4 +1,4 @@
-# supermall
+# testcli3vue2
 
 ## Project setup
 ```

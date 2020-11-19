@@ -1,17 +1,25 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import Home from 'views/home/Home.vue'
-const Category = () => import('../views/category/Category')
+import Vue from 'vue'
+import VueRouter from 'vue-router'
+
+
+Vue.use(VueRouter)
+
 const routes = [
   {
-    path: '/',
+    path: '',
     name: 'Home',
-    component: Home
+    component: () => import('views/home/Home.vue')
+  },
+  {
+    path: '/home',
+    name: 'Home',
+    component: () => import('views/home/Home.vue')
   },
   {
     path: '/category',
-    name: 'Category', 
+    name: 'Cate', 
     // 懒加载
-    component: Category
+    component: () => import('views/category/Cate.vue')
   },{
     path: '/cart',
     name: 'Cart',
@@ -23,8 +31,9 @@ const routes = [
   }
 ]
 
-const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
+const router = new VueRouter({
+  mode: 'history',
+  base: process.env.BASE_URL,
   routes
 })
 

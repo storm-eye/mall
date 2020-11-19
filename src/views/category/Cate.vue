@@ -6,7 +6,7 @@
 
 <script>
 export default {
-  name: 'Category'
+  name: 'Cate'
 }
 </script>
 

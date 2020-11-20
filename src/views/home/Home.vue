@@ -5,7 +5,11 @@
         <p>购物街</p>
       </template>
     </nav-bar>
-    <scroll class='content' ref="scroll">
+    <scroll class='content' ref="scroll" 
+    :probeType="3" 
+    @scroll="contentScroll"
+    :pullUpLoad="true"
+    @pullingUp="loadMore">
       <home-swiper :banners="banners" />
       <recommends-view :recommends="recommends" />
       <feature-view />
@@ -16,7 +20,7 @@
       />
       <goods-list :goods="showGoods" />
     </scroll>
-    <back-top @click.native='butClick'></back-top>
+    <back-top @click.native='butClick' v-show="isBackTopShow"></back-top>
   </div>
 </template>
 
@@ -58,6 +62,7 @@ export default {
         sell: { page: 0, list: [] },
       },
       currentType: "pop",
+      isBackTopShow: false
     };
   },
   created() {
@@ -84,6 +89,10 @@ export default {
         this.goods[type].page += 1;
       });
     },
+    loadMore(){
+      this.getHomeGoods(this.currentType)
+      this.$refs.scroll.finishPullUp()
+    },
     /* 
       事件监听
     */
@@ -102,6 +111,9 @@ export default {
     },
     butClick(){
       this.$refs.scroll.scrollTo(0,0)
+    },
+    contentScroll(positon){
+      this.isBackTopShow = (-positon.y)>1000
     }
   },
   computed: {

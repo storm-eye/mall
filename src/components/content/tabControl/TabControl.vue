@@ -36,7 +36,6 @@ export default {
   text-align: center;
   height: 40px;
   line-height: 40px;
-  margin: 5px
 }
 .tab-control-item{
   flex: 1

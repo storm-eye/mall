@@ -5,28 +5,38 @@
         <p>购物街</p>
       </template>
     </nav-bar>
-    <scroll class='content' ref="scroll" 
-    :probeType="3" 
-    @scroll="contentScroll"
-    :pullUpLoad="true"
-    @pullingUp="loadMore">
-      <home-swiper :banners="banners" />
+    <tab-control
+      ref="tabControl1"
+      :titles="['流行', '新款', '精品']"
+      class="tab-control"
+      @tabClick="tabClick"
+      v-show="isTabShow"
+    />
+    <scroll
+      class="content"
+      ref="scroll"
+      :probeType="3"
+      @scroll="contentScroll"
+      :pullUpLoad="true"
+      @pullingUp="loadMore"
+    >
+      <home-swiper :banners="banners" @swiperImageLoad="swiperLoad" />
       <recommends-view :recommends="recommends" />
       <feature-view />
       <tab-control
+        ref="tabControl2"
         :titles="['流行', '新款', '精品']"
-        class="tab-control"
         @tabClick="tabClick"
       />
       <goods-list :goods="showGoods" />
     </scroll>
-    <back-top @click.native='butClick' v-show="isBackTopShow"></back-top>
+    <back-top @click.native="butClick" v-show="isBackTopShow"></back-top>
   </div>
 </template>
 
 <script>
 import NavBar from "components/common/navbar/NavBar";
-import Scroll from "components/common/scroll/scroll";
+import Scroll from "components/common/scroll/Scroll";
 
 import TabControl from "components/content/tabControl/TabControl";
 import GoodsList from "components/content/goods/GoodsList";
@@ -37,6 +47,8 @@ import RecommendsView from "./childcomps/RecommendsView";
 import FeatureView from "./childcomps/FeatureView";
 
 import { getHomeMultidata, getHomeGoods } from "network/home";
+
+import { debounce } from "common/utils";
 export default {
   name: "Home",
   components: {
@@ -48,8 +60,7 @@ export default {
 
     HomeSwiper,
     RecommendsView,
-    FeatureView
-  
+    FeatureView,
   },
   data() {
     return {
@@ -62,14 +73,33 @@ export default {
         sell: { page: 0, list: [] },
       },
       currentType: "pop",
-      isBackTopShow: false
+      isBackTopShow: false,
+      tabControlTop: 0,
+      isTabShow: false,
+      saveY: 0
     };
   },
   created() {
+    //请求轮播，推荐数据
     this.getHomeMultidata();
+    //请求商品数据
     this.getHomeGoods("pop");
     this.getHomeGoods("new");
     this.getHomeGoods("sell");
+  },
+  mounted() {
+    //监听item中图片加载完成
+    const refresh = debounce(this.$refs.scroll.refresh, 200);
+    this.$bus.$on("itemImageLoad", () => {
+      refresh();
+    });
+  },
+  activated(){
+    this.$refs.scroll.scrollTo(0,this.saveY,0)
+    this.$refs.scroll.refresh()
+  },
+  deactivated(){
+    this.saveY = this.$refs.scroll.getScrollY()
   },
   methods: {
     /* 
@@ -83,21 +113,22 @@ export default {
     },
     getHomeGoods(type) {
       const page = this.goods[type].page + 1;
+
       getHomeGoods(type, page).then((res) => {
-        console.log(res);
+        // console.log(res);
         this.goods[type].list.push(...res.data.data.list);
         this.goods[type].page += 1;
+        this.$refs.scroll.finishPullUp();
       });
     },
-    loadMore(){
-      this.getHomeGoods(this.currentType)
-      this.$refs.scroll.finishPullUp()
+    loadMore() {
+      this.getHomeGoods(this.currentType);
     },
     /* 
       事件监听
     */
+
     tabClick(index) {
-      console.log(index);
       switch (index) {
         case 0:
           this.currentType = "pop";
@@ -107,14 +138,21 @@ export default {
           break;
         case 2:
           this.currentType = "sell";
+          break;
       }
+      this.$refs.tabControl1.currentIndex = index;
+      this.$refs.tabControl2.currentIndex = index;
     },
-    butClick(){
-      this.$refs.scroll.scrollTo(0,0)
+    butClick() {
+      this.$refs.scroll.scrollTo(0, 0);
     },
-    contentScroll(positon){
-      this.isBackTopShow = (-positon.y)>1000
-    }
+    contentScroll(positon) {
+      this.isBackTopShow = -positon.y > 1000;
+      this.isTabShow = -positon.y > this.tabControlTop;
+    },
+    swiperLoad() {
+      this.tabControlTop = this.$refs.tabControl2.$el.offsetTop;
+    },
   },
   computed: {
     showGoods() {
@@ -125,7 +163,7 @@ export default {
 </script>
 
 <style scoped>
-#home{
+#home {
   /* padding-top: 44px; */
   height: 100vh;
   position: relative;
@@ -144,22 +182,19 @@ export default {
   background-color: var(--color-tint);
 }
 .tab-control {
-  /* position: relative; */
-  position: sticky;
-  top: 44px;
+  position: relative;
   z-index: 9;
   background-color: #fff;
 }
-.content{
+.content {
   /* 有冲突，滚不动 */
-  height: calc(100% - 98px);
+  /* height: calc(100% - 98px); */
   /* height: 300px; */
   overflow: hidden;
-  /* position: absolute;
+  position: absolute;
   top: 44px;
   bottom: 49px;
   left: 0;
-  right: 0; */
-  
+  right: 0;
 }
 </style>

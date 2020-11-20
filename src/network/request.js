@@ -5,19 +5,15 @@ export function request(config){
     timeout: 10000
   })
 
-  instance.interceptors.request.use( config =>{
-    console.log("拦截")
-    //记得检测完后，得放行
-    return config
-  },err =>{
-    console.log(err)
-  })
+  // instance.interceptors.request.use( config =>{
+  //   console.log("拦截")
+  //   //记得检测完后，得放行
+  //   return config
+  // },err =>{
+  //   console.log(err)
+  // })
 
-  //返回的也是promise
-  return instance(config)
-}
-
-// //在main.js设置全局的请求次数，请求的间隙
+  //在main.js设置全局的请求次数，请求的间隙
 // axios.defaults.retry = 4;
 // axios.defaults.retryDelay = 1000;
 // axios.interceptors.response.use(undefined, function axiosRetryInterceptor(err) {
@@ -44,3 +40,8 @@ export function request(config){
 //         return axios(config);
 //     });
 // });
+
+  //返回的也是promise
+  return instance(config)
+}
+

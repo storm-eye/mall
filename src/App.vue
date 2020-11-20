@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <main-tab-bar> </main-tab-bar>
+    <main-tab-bar class="maintabbar"> </main-tab-bar>
     <router-view />
   </div>
 </template>
@@ -18,4 +18,9 @@ export default {
 
 <style>
 @import "./assets/css/base.css";
+/* .maintabbar{
+  position: fixed;
+  bottom: 0;
+  z-index: 999;
+} */
 </style>

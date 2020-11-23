@@ -64,6 +64,6 @@ export default {
 <style scoped>
 .tabbar{
   background-color: #fff;
-  z-index: 9999;
+  z-index: 9;
 }
 </style>

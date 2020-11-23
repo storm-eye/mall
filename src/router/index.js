@@ -17,14 +17,14 @@ const routes = [
   },
   {
     path: '/category',
-    name: 'Cate', 
+    name: 'Cate',
     // 懒加载
     component: () => import('views/category/Cate.vue')
-  },{
+  }, {
     path: '/cart',
     name: 'Cart',
     component: () => import('views/cart/Cart.vue')
-  },{
+  }, {
     path: '/profile',
     name: 'Profile',
     component: () => import('views/profile/Profile.vue')
@@ -41,5 +41,11 @@ const router = new VueRouter({
   base: process.env.BASE_URL,
   routes
 })
+
+
+const originalPush = VueRouter.prototype.push
+VueRouter.prototype.push = function push(location) {
+  return originalPush.call(this, location).catch(err => err)
+}
 
 export default router

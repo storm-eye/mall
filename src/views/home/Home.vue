@@ -49,6 +49,7 @@ import FeatureView from "./childcomps/FeatureView";
 import { getHomeMultidata, getHomeGoods } from "network/home";
 
 import { debounce } from "common/utils";
+import {itemListenerMixin} from "common/mixin.js"
 export default {
   name: "Home",
   components: {
@@ -62,6 +63,7 @@ export default {
     RecommendsView,
     FeatureView,
   },
+  mixins: [itemListenerMixin],
   data() {
     return {
       result: null,
@@ -87,19 +89,13 @@ export default {
     this.getHomeGoods("new");
     this.getHomeGoods("sell");
   },
-  mounted() {
-    //监听item中图片加载完成
-    const refresh = debounce(this.$refs.scroll.refresh, 200);
-    this.$bus.$on("itemImageLoad", () => {
-      refresh();
-    });
-  },
   activated(){
     this.$refs.scroll.scrollTo(0,this.saveY,0)
     this.$refs.scroll.refresh()
   },
   deactivated(){
     this.saveY = this.$refs.scroll.getScrollY()
+    this.$bus.$off ('itemImageLoad',this.itemImgListener)
   },
   methods: {
     /* 

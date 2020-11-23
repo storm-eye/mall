@@ -8,10 +8,10 @@
       </template>
      <template v-slot:center >
       <div class="titles"> 
-        <span v-for="(item,index) in titles" :key="index" 
+        <span v-for= "(item,index) in titles" :key= "index" 
         class="center-item"
         @click= "itemClick(index)"
-        :class="{'active': currentIndex==index}">{{item}}</span></div>
+        :class= "{'active': currentIndex==index}">{{item}}</span></div>
      </template>
     </nav-bar>
   </div>
@@ -33,6 +33,7 @@ export default {
   methods:{
     itemClick(index){
       this.currentIndex = index
+      this.$emit('titleClick',index)
     },
     backClick(){
       this.$router.back()

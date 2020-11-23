@@ -45,9 +45,9 @@ export default {
 
 <style  scoped>
 .comment-info{
-  
   padding:0 10px;
   border-top: 5px solid rgb(235, 231, 231);
+  border-bottom: 5px solid rgb(235, 231, 231);
 }
 .info-header{
   height: 50px;
@@ -77,7 +77,7 @@ export default {
 }
 .info-user{
    padding:15px 10px;
-   border-top: 3px solid rgb(235, 231, 231);;
+   border-top: 3px solid rgb(235, 231, 231);
 }
 .info-user img{
   width: 30px;
@@ -106,5 +106,6 @@ export default {
   width: 70px;
   height: 70px;
   margin-right: 5px;
+  margin-bottom: 20px;
 }
 </style>

@@ -1,15 +1,16 @@
 <template>
   <div id="the-detail">
-    <detail-nav-bar class="detailnav"></detail-nav-bar>
+    <detail-nav-bar class="detailnav" @titleClick="navClick"></detail-nav-bar>
 
     <scroll class="content" ref="scroll">
       <detail-swiper :topImages="topImages"></detail-swiper>
       <detail-base-info :goods="goods" />
       <detail-shop-info :shop="shop" />
       <detail-goods-info :detailInfo="detailInfo" @imageLoad="goodsImageLoad" />
-      <detail-param-info :paramInfo="paramInfo" />
-      <detail-comment-info :commentInfo="commentInfo" />
-      <goods-list :goods="recommends" />
+      <detail-param-info :paramInfo="paramInfo" ref="param" />
+      <detail-comment-info :commentInfo="commentInfo" ref="comment" />
+      <!-- <div class="rec-title"><span>推荐模块</span></div> -->
+      <goods-list :goods="recommends" ref="recommend" />
     </scroll>
   </div>
 </template>
@@ -25,6 +26,8 @@ import DetailParamInfo from "./childComps/DetailParamInfo.vue";
 import DetailCommentInfo from "./childComps/DetailCommentInfo.vue";
 
 import GoodsList from "components/content/goods/GoodsList.vue";
+
+import { itemListenerMixin } from "common/mixin.js";
 
 import {
   getDetail,
@@ -50,6 +53,7 @@ export default {
 
     Scroll,
   },
+  mixins: [itemListenerMixin],
   data() {
     return {
       iid: null,
@@ -60,6 +64,8 @@ export default {
       paramInfo: {},
       commentInfo: {},
       recommends: [],
+      themeTopYs: [],
+      getThemeTopY: null,
     };
   },
   created() {
@@ -95,11 +101,26 @@ export default {
       if (data.rate.cRate != 0) {
         this.commentInfo = data.rate.list[0];
       }
+      //给getThemeTopY赋值
+      this.getThemeTopY = () => {
+        console.log("----");
+        this.themeTopYs.push(0);
+        this.themeTopYs.push(this.$refs.param.$el.offsetTop);
+        this.themeTopYs.push(this.$refs.comment.$el.offsetTop);
+        this.themeTopYs.push(this.$refs.recommend.$el.offsetTop);
+      };
     });
+  },
+  destroyed() {
+    this.$bus.$off("itemImageLoad", this.itemImgListener);
   },
   methods: {
     goodsImageLoad() {
       this.$refs.scroll.refresh();
+      this.getThemeTopY();
+    },
+    navClick(index) {
+      this.$refs.scroll.scrollTo(0,-(this.themeTopYs[index]-44),100)
     },
   },
 };
@@ -120,6 +141,10 @@ export default {
   position: relative;
   background-color: #fff;
   z-index: 999;
+}
+.rec-title{
+  padding: 12px 0;
+  text-align: center;
 }
 .s {
   width: 100%;

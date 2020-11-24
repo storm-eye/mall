@@ -30,7 +30,7 @@
       />
       <goods-list :goods="showGoods" />
     </scroll>
-    <back-top @click.native="butClick" v-show="isBackTopShow"></back-top>
+    <back-top @click.native="goBack" v-show="isBackTopShow"></back-top>
   </div>
 </template>
 
@@ -40,7 +40,6 @@ import Scroll from "components/common/scroll/Scroll";
 
 import TabControl from "components/content/tabControl/TabControl";
 import GoodsList from "components/content/goods/GoodsList";
-import BackTop from "components/content/backtop/BackTop";
 
 import HomeSwiper from "./childcomps/HomeSwiper";
 import RecommendsView from "./childcomps/RecommendsView";
@@ -49,7 +48,7 @@ import FeatureView from "./childcomps/FeatureView";
 import { getHomeMultidata, getHomeGoods } from "network/home";
 
 import { debounce } from "common/utils";
-import {itemListenerMixin} from "common/mixin.js"
+import {itemListenerMixin,backTopMixin} from "common/mixin.js"
 export default {
   name: "Home",
   components: {
@@ -57,13 +56,13 @@ export default {
     Scroll,
     TabControl,
     GoodsList,
-    BackTop,
+    // BackTop,
 
     HomeSwiper,
     RecommendsView,
     FeatureView,
   },
-  mixins: [itemListenerMixin],
+  mixins: [itemListenerMixin,backTopMixin],
   data() {
     return {
       result: null,
@@ -75,7 +74,7 @@ export default {
         sell: { page: 0, list: [] },
       },
       currentType: "pop",
-      isBackTopShow: false,
+      // isBackTopShow: false,
       tabControlTop: 0,
       isTabShow: false,
       saveY: 0
@@ -139,12 +138,11 @@ export default {
       this.$refs.tabControl1.currentIndex = index;
       this.$refs.tabControl2.currentIndex = index;
     },
-    butClick() {
-      this.$refs.scroll.scrollTo(0, 0);
-    },
-    contentScroll(positon) {
-      this.isBackTopShow = -positon.y > 1000;
-      this.isTabShow = -positon.y > this.tabControlTop;
+   
+    contentScroll(position) {
+      this.ShowBackTop(position)
+      //吸顶功能
+      this.isTabShow = -position.y > this.tabControlTop;
     },
     swiperLoad() {
       this.tabControlTop = this.$refs.tabControl2.$el.offsetTop;

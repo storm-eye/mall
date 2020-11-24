@@ -1,8 +1,15 @@
 <template>
   <div id="the-detail">
-    <detail-nav-bar class="detailnav" @titleClick="navClick"></detail-nav-bar>
+    <detail-nav-bar
+      class="detailnav"
+      @titleClick="navClick"
+      ref="detailNavBar"
+    ></detail-nav-bar>
 
-    <scroll class="content" ref="scroll">
+    
+
+    <scroll class="content" ref="scroll" :probeType="3" @scroll="contentScroll">
+      <p>{{$store.state.cartList}}</p>
       <detail-swiper :topImages="topImages"></detail-swiper>
       <detail-base-info :goods="goods" />
       <detail-shop-info :shop="shop" />
@@ -12,6 +19,8 @@
       <!-- <div class="rec-title"><span>推荐模块</span></div> -->
       <goods-list :goods="recommends" ref="recommend" />
     </scroll>
+    <back-top @click.native="goBack" v-show="isBackTopShow"></back-top>
+    <detail-bottom-bar @addToCart="addToCart"/>
   </div>
 </template>
 
@@ -24,10 +33,12 @@ import DetailNavBar from "./childComps/DetailNavBar.vue";
 import DetailGoodsInfo from "./childComps/DetailGoodsInfo.vue";
 import DetailParamInfo from "./childComps/DetailParamInfo.vue";
 import DetailCommentInfo from "./childComps/DetailCommentInfo.vue";
+import DetailBottomBar from "./childComps/DetailBottomBar.vue";
+
 
 import GoodsList from "components/content/goods/GoodsList.vue";
 
-import { itemListenerMixin } from "common/mixin.js";
+import {itemListenerMixin,backTopMixin} from "common/mixin.js"
 
 import {
   getDetail,
@@ -50,10 +61,11 @@ export default {
     DetailParamInfo,
     DetailCommentInfo,
     GoodsList,
+    DetailBottomBar,
 
     Scroll,
   },
-  mixins: [itemListenerMixin],
+  mixins: [itemListenerMixin,backTopMixin],
   data() {
     return {
       iid: null,
@@ -66,8 +78,11 @@ export default {
       recommends: [],
       themeTopYs: [],
       getThemeTopY: null,
+      currentIndex: 0
+      
     };
   },
+  
   created() {
     //保存传入的iid
     this.iid = this.$route.params.iid;
@@ -103,11 +118,12 @@ export default {
       }
       //给getThemeTopY赋值
       this.getThemeTopY = () => {
-        console.log("----");
         this.themeTopYs.push(0);
         this.themeTopYs.push(this.$refs.param.$el.offsetTop);
         this.themeTopYs.push(this.$refs.comment.$el.offsetTop);
         this.themeTopYs.push(this.$refs.recommend.$el.offsetTop);
+        this.themeTopYs.push(Number.MAX_VALUE)
+        console.log(this.themeTopYs)
       };
     });
   },
@@ -120,8 +136,34 @@ export default {
       this.getThemeTopY();
     },
     navClick(index) {
-      this.$refs.scroll.scrollTo(0,-(this.themeTopYs[index]-44),100)
+      this.$refs.scroll.scrollTo(0, -(this.themeTopYs[index] - 44), 100);
     },
+    contentScroll(position){
+      //控制返回顶部的出现
+      this.ShowBackTop(position)
+      //滚动到相应位置时，导航栏跟着变化
+      let positionY = -position.y     
+      const length = this.themeTopYs.length
+      for(let i=0; i<length-1;i++){
+        if(this.currentIndex !==i && ((i<length-1 && positionY>this.themeTopYs[i] && positionY<this.themeTopYs[i+1]))){
+          this.currentIndex = i
+          this.$refs.detailNavBar.currentIndex = this.currentIndex
+        }
+      }
+    },
+    addToCart(){
+      //获取需要添加到购物车的信息
+      const produce = {}
+      produce.image = this.topImages[0]
+      produce.title = this.goods.title
+      produce.desc = this.goods.desc
+      produce.price = this.goods.realPrice
+      produce.iid = this.iid
+      produce.count = 0
+      //添加到购物车里
+      // this.$store.commit('addCart',produce)
+      this.$store.dispatch(ADD_TO_CART,produce)
+    }
   },
 };
 </script>
@@ -134,15 +176,16 @@ export default {
   height: 100vh;
 }
 .content {
-  height: calc(100% - 44px);
+  height: calc(100% - 44px - 49px);
   z-index: 99;
+  overflow: hidden;
 }
 .detailnav {
   position: relative;
   background-color: #fff;
   z-index: 999;
 }
-.rec-title{
+.rec-title {
   padding: 12px 0;
   text-align: center;
 }
